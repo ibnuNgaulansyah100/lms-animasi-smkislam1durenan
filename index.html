@@ -403,27 +403,33 @@
 
     // 2. LOGIN & ROLE MENU
     async function handleLogin(e) {
-      e.preventDefault();
-      const u = document.getElementById('username').value;
-      const p = document.getElementById('password').value;
-      const btn = document.getElementById('btn-login');
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
+  e.preventDefault();
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  const btn = document.getElementById('btn-login');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
+  btn.disabled = true;
 
-      const res = await callGasApi({ action: 'login', username: u, password: p });
-      btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Masuk ke Sistem';
-      
-      if (res.status === 'success') {
-        currentUser = res.user;
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('user-display-name').innerText = currentUser.nama;
-        document.getElementById('user-display-role').innerText = currentUser.role;
-        buildSidebarMenu(currentUser.role);
-        loadAllData();
-      } else {
-        alert(res.message);
-      }
+  try {
+    const res = await callGasApi({ action: 'login', username: u, password: p });
+    if (res.status === 'success') {
+      currentUser = res.user;
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('user-display-name').innerText = currentUser.nama;
+      document.getElementById('user-display-role').innerText = currentUser.role;
+      buildSidebarMenu(currentUser.role);
+      loadAllData();
+    } else {
+      alert(res.message || 'Login gagal!');
     }
+  } catch (err) {
+    alert('Gagal terhubung ke server database. Pastikan URL Web App benar dan akses diatur ke Anyone.\nDetail: ' + err.message);
+  } finally {
+    btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Masuk ke Sistem';
+    btn.disabled = false;
+  }
+}
 
     function buildSidebarMenu(role) {
       const menu = document.getElementById('sidebar-menu');
